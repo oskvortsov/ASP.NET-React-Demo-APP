@@ -1,0 +1,7 @@
+db:
+  image: mcr.microsoft.com/mssql/server
+  environment:
+    - SA_PASSWORD=SuperStrongPassword@
+    - ACCEPT_EULA=Y
+  ports:
+    - "5434:1433"
