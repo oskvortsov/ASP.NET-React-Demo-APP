@@ -4,7 +4,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 
 import './styles/index.scss';
 import { AuthGuard, AuthProvider } from './feature/auth-provider';
-import { RootStore, RootStoreProvider } from './model/root-store';
+import { RootStore, RootStoreProvider } from './models/root-store';
 import { EmployeeList } from './pages/employee/employee-list';
 import { LoginPage } from './pages/login/login';
 

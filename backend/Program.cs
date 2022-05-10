@@ -12,6 +12,13 @@ ConfigurationManager configuration = builder.Configuration;
 // Add services to the container.
 builder.Services.AddControllers();
 
+builder.Services.AddCors(options => options.AddDefaultPolicy(corsBuilder =>
+{
+    corsBuilder.AllowAnyHeader();
+    corsBuilder.AllowAnyOrigin();
+    corsBuilder.AllowAnyMethod();
+}));
+
 // Add Database 
 builder.Services.AddDbContext<MsSqlContext>(o => o.UseSqlServer(
     builder.Configuration.GetConnectionString("MsSQL"))
@@ -57,6 +64,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 

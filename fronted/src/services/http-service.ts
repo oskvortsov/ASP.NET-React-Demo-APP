@@ -6,20 +6,16 @@ import axios, {
   AxiosResponse
 } from 'axios';
 
-export type HttpServiceError = Pick<AxiosError, 'message' | 'code'>;
+export type HttpServiceError = Pick<AxiosError, 'message' | 'code' | 'status'>;
 type ErrorHandlerFunction = (error: HttpServiceError) => void;
 
 export class HttpService {
   private axiosIntance: Axios;
-  private baseUrl: string;
   private errorHandlers: ErrorHandlerFunction[] = [];
 
   constructor(baseUrl: string) {
-    this.baseUrl = baseUrl;
     this.axiosIntance = axios.create({
-      headers: {
-        'Access-Control-Allow-Origin': '*'
-      }
+      baseURL: baseUrl
     });
   }
 
@@ -37,10 +33,12 @@ export class HttpService {
   }
 
   private get Headers() {
-    const headers: AxiosRequestHeaders = {};
+    const headers: AxiosRequestHeaders = {
+      'Access-Control-Allow-Origin': '*'
+    };
 
     if (localStorage.getItem('token')) {
-      headers['token'] = `Bearer ${localStorage.getItem('token')}`;
+      headers['Authorization'] = `Bearer ${localStorage.getItem('token')}`;
     }
 
     return headers;
@@ -48,14 +46,12 @@ export class HttpService {
 
   private methodFactory(method: 'delete' | 'put' | 'get' | 'post') {
     return (url: string, body?: unknown) => {
-      const fullUrl = this.resolveUrl(url);
-
       const config: AxiosRequestConfig = {
         headers: this.Headers
       };
 
       if (['post', 'put'].includes(method)) {
-        return this.axiosIntance[method as 'put' | 'post'](fullUrl, body, config)
+        return this.axiosIntance[method as 'put' | 'post'](url, body, config)
           .then(this.handlerResponse.bind(this))
           .catch(this.handlerError.bind(this));
       }
@@ -66,14 +62,11 @@ export class HttpService {
     };
   }
 
-  private resolveUrl(url: string) {
-    return `${this.baseUrl}${url}`;
-  }
-
   private handlerError(error: AxiosError): HttpServiceError {
     const data: HttpServiceError = {
       message: error.message,
-      code: error.code
+      code: error.code,
+      status: String(error.response?.status || '')
     };
 
     this.errorHandlers.forEach((callback) => callback(data));

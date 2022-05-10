@@ -33,8 +33,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const unAuthErrorHandler = useCallback(
-    ({ code }: HttpServiceError) => {
-      if (code === '401') {
+    ({ status }: HttpServiceError) => {
+      if (status === '401') {
         signOut();
       }
     },
