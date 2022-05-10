@@ -50,6 +50,11 @@ const EmployeeListComponent = () => {
     navigate('/employees/new');
   }
 
+  function handlerRowClick(data: any) {
+    const id = data.row.id;
+    navigate(`/employees/${id}`);
+  }
+
   return (
     <div className={style.container}>
       <div className={style.btnContainer}>
@@ -63,7 +68,10 @@ const EmployeeListComponent = () => {
         columns={columns}
         pageSize={5}
         rowsPerPageOptions={[5]}
-        checkboxSelection
+        disableColumnFilter
+        disableColumnMenu
+        disableSelectionOnClick={true}
+        onRowClick={handlerRowClick}
       />
     </div>
   );

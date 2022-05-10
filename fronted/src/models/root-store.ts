@@ -1,7 +1,7 @@
 import { makeObservable, observable, runInAction } from 'mobx';
 import { createContext, useContext } from 'react';
 import { httpClient } from '../services/http-service';
-import { Employee } from './types';
+import { Employee } from './employee';
 
 export class RootStore {
   employees: Employee[];
@@ -26,11 +26,15 @@ export class RootStore {
     return httpClient.get(`/employee/${id}`);
   };
 
-  createOrUpdate = async (employee: Employee, id?: string) => {
+  createOrUpdateEmployee = async (employee: Employee, id?: string) => {
     const url = id ? `/employee/${id}` : '/employee';
     const method = id ? 'put' : 'post';
 
     return httpClient[method](url, employee);
+  };
+
+  removeEmployee = async (id?: string) => {
+    return httpClient.delete(`/employee/${id}`);
   };
 }
 
