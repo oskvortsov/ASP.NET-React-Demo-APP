@@ -1,32 +1,34 @@
 using backend.Contexts;
 using backend.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace backend.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("employee")]
 public class EmployeesController: ControllerBase
 {
-    private readonly MsSqlContext dbContext;
+    private readonly MsSqlContext _dbContext;
 
     public EmployeesController(MsSqlContext db)
     {
-        dbContext = db;
+        _dbContext = db;
     }
 
     [HttpGet]
     public List<Employee> List()
     {
-        var persons = dbContext.Employees.ToList();
+        var persons = _dbContext.Employees.ToList();
         return persons;
     }
 
     [HttpGet("{id:int}")]
     public IActionResult Get(int id)
     {
-        var person = dbContext.Employees.Find(id);
+        var person = _dbContext.Employees.Find(id);
 
         if (person == null)
         {
@@ -40,8 +42,8 @@ public class EmployeesController: ControllerBase
     public IActionResult Create([FromBody] Employee employee)
     {
         employee.LastModifiedDate = DateTime.Now;
-        dbContext.Add(employee);
-        dbContext.SaveChanges();
+        _dbContext.Add(employee);
+        _dbContext.SaveChanges();
 
         return Ok(employee);
     }
@@ -52,8 +54,8 @@ public class EmployeesController: ControllerBase
         employee.Id = id;
         employee.LastModifiedDate = DateTime.UtcNow;
         
-        dbContext.Entry(employee).State = EntityState.Modified;
-        dbContext.SaveChanges();
+        _dbContext.Entry(employee).State = EntityState.Modified;
+        _dbContext.SaveChanges();
 
         return Ok(employee);
     }
@@ -61,15 +63,15 @@ public class EmployeesController: ControllerBase
     [HttpDelete("{id:int}")]
     public IActionResult Delete(int id)
     {
-        var employee = dbContext.Employees.Find(id);
+        var employee = _dbContext.Employees.Find(id);
 
         if (employee == null)
         {
             return NotFoundMessageById(id);
         }
 
-        dbContext.Employees.Remove(employee);
-        dbContext.SaveChanges();
+        _dbContext.Employees.Remove(employee);
+        _dbContext.SaveChanges();
         return Ok("Employee have been removed");
     }
 

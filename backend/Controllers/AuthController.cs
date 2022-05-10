@@ -11,6 +11,7 @@ using JwtRegisteredClaimNames = Microsoft.IdentityModel.JsonWebTokens.JwtRegiste
 namespace backend.Controllers;
 
 [ApiController]
+[Route("[controller]")]
 public class AuthController: ControllerBase
 {
     private readonly UserManager<IdentityUser> _userManager;
@@ -22,7 +23,7 @@ public class AuthController: ControllerBase
         _configuration = configuration;
     }
     
-    [HttpPost("/login")]
+    [HttpPost]
     public async Task<IActionResult> Login([FromBody] LoginModel loginModel)
     {
         var user = await _userManager.FindByNameAsync(loginModel.Username);
@@ -47,7 +48,7 @@ public class AuthController: ControllerBase
         return Unauthorized();
     }
 
-    [HttpPost("/register")]
+    [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] User userModel)
     {
         var isUserExists = await _userManager.FindByNameAsync(userModel.Username) != null;
