@@ -5,6 +5,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import './styles/index.scss';
 import { AuthGuard, AuthProvider } from './feature/auth-provider';
 import { RootStore, RootStoreProvider } from './models/root-store';
+import { EmployeeDetail } from './pages/employee/employee-detail';
 import { EmployeeList } from './pages/employee/employee-list';
 import { LoginPage } from './pages/login/login';
 
@@ -20,6 +21,14 @@ function App() {
             element={
               <AuthGuard>
                 <EmployeeList />
+              </AuthGuard>
+            }
+          />
+          <Route
+            path="/employees/:id"
+            element={
+              <AuthGuard>
+                <EmployeeDetail />
               </AuthGuard>
             }
           />

@@ -21,6 +21,17 @@ export class RootStore {
       });
     });
   };
+
+  getEmployee = async (id: string): Promise<Employee> => {
+    return httpClient.get(`/employee/${id}`);
+  };
+
+  createOrUpdate = async (employee: Employee, id?: string) => {
+    const url = id ? `/employee/${id}` : '/employee';
+    const method = id ? 'put' : 'post';
+
+    return httpClient[method](url, employee);
+  };
 }
 
 const RootStoreContext = createContext<RootStore | null>(null);
