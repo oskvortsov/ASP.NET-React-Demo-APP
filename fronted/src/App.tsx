@@ -24,7 +24,7 @@ function App() {
             }
           />
           <Route path={'/login'} element={<LoginPage />} />
-          <Route path="*" element={<Navigate to="/employees" replace />} />
+          <Route path="/" element={<Navigate to="/employees" replace />} />
         </Routes>
       </RootStoreProvider>
     </AuthProvider>

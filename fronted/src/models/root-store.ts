@@ -1,27 +1,26 @@
-import { computed, makeObservable, observable, toJS } from 'mobx';
+import { makeObservable, observable, runInAction } from 'mobx';
 import { createContext, useContext } from 'react';
 import { httpClient } from '../services/http-service';
 import { Employee } from './types';
 
 export class RootStore {
-  _employees: Employee[] = [];
+  employees: Employee[];
 
   constructor() {
+    this.employees = [];
+
     makeObservable(this, {
-      _employees: observable,
-      employees: computed
+      employees: observable
     });
   }
 
   getEmployees = () => {
     httpClient.get('/employee').then((employees: Employee[]) => {
-      this._employees = employees;
+      runInAction(() => {
+        this.employees = employees;
+      });
     });
   };
-
-  get employees() {
-    return toJS(this._employees);
-  }
 }
 
 const RootStoreContext = createContext<RootStore | null>(null);

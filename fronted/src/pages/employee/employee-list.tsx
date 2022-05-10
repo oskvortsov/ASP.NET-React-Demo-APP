@@ -1,17 +1,18 @@
 import React, { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
+
 import { useStore } from '../../models/root-store';
 
+import style from './employee.module.scss';
+
 const EmployeeListComponent = () => {
-  const { employees, getEmployees } = useStore();
+  const { getEmployees } = useStore();
 
   useEffect(() => {
     getEmployees();
   }, []);
 
-  console.log(employees);
-
-  return <div>asd</div>;
+  return <div className={style.container}>asd</div>;
 };
 
 export const EmployeeList = observer(EmployeeListComponent);

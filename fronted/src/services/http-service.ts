@@ -9,12 +9,14 @@ import axios, {
 export type HttpServiceError = Pick<AxiosError, 'message' | 'code' | 'status'>;
 type ErrorHandlerFunction = (error: HttpServiceError) => void;
 
+const TokenLS = 'token';
+
 export class HttpService {
-  private axiosIntance: Axios;
+  private axiosInstance: Axios;
   private errorHandlers: ErrorHandlerFunction[] = [];
 
   constructor(baseUrl: string) {
-    this.axiosIntance = axios.create({
+    this.axiosInstance = axios.create({
       baseURL: baseUrl
     });
   }
@@ -37,8 +39,8 @@ export class HttpService {
       'Access-Control-Allow-Origin': '*'
     };
 
-    if (localStorage.getItem('token')) {
-      headers['Authorization'] = `Bearer ${localStorage.getItem('token')}`;
+    if (localStorage.getItem(TokenLS)) {
+      headers['Authorization'] = `Bearer ${localStorage.getItem(TokenLS)}`;
     }
 
     return headers;
@@ -51,12 +53,12 @@ export class HttpService {
       };
 
       if (['post', 'put'].includes(method)) {
-        return this.axiosIntance[method as 'put' | 'post'](url, body, config)
+        return this.axiosInstance[method as 'put' | 'post'](url, body, config)
           .then(this.handlerResponse.bind(this))
           .catch(this.handlerError.bind(this));
       }
 
-      return this.axiosIntance[method](url, config)
+      return this.axiosInstance[method](url, config)
         .then(this.handlerResponse.bind(this))
         .catch(this.handlerError.bind(this));
     };
