@@ -1,18 +1,13 @@
 import { makeObservable, observable } from 'mobx';
 import { createContext, useContext } from 'react';
-import { AuthStore } from './auth-store';
 
 export class RootStore {
   public test: number = 1;
-
-  public authStore: AuthStore;
 
   constructor() {
     makeObservable(this, {
       test: observable
     });
-
-    this.authStore = new AuthStore(this);
   }
 }
 

@@ -1,14 +1,26 @@
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, {
+  Axios,
+  AxiosError,
+  AxiosRequestConfig,
+  AxiosRequestHeaders,
+  AxiosResponse
+} from 'axios';
 
-type HttpServiceErrorResponse = Pick<AxiosError, 'message' | 'code'>;
-type ErrorHandlerFunction = (error?: HttpServiceErrorResponse) => void;
+export type HttpServiceError = Pick<AxiosError, 'message' | 'code'>;
+type ErrorHandlerFunction = (error: HttpServiceError) => void;
 
 export class HttpService {
+  private axiosIntance: Axios;
   private baseUrl: string;
   private errorHandlers: ErrorHandlerFunction[] = [];
 
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl;
+    this.axiosIntance = axios.create({
+      headers: {
+        'Access-Control-Allow-Origin': '*'
+      }
+    });
   }
 
   post = this.methodFactory('post');
@@ -24,17 +36,33 @@ export class HttpService {
     this.errorHandlers = this.errorHandlers.filter((cb) => cb === callback);
   }
 
+  private get Headers() {
+    const headers: AxiosRequestHeaders = {};
+
+    if (localStorage.getItem('token')) {
+      headers['token'] = `Bearer ${localStorage.getItem('token')}`;
+    }
+
+    return headers;
+  }
+
   private methodFactory(method: 'delete' | 'put' | 'get' | 'post') {
-    return (url: string, body?: unknown | AxiosRequestConfig) => {
+    return (url: string, body?: unknown) => {
       const fullUrl = this.resolveUrl(url);
 
-      let requestMethod: Promise<AxiosResponse> = axios[method](url);
+      const config: AxiosRequestConfig = {
+        headers: this.Headers
+      };
 
       if (['post', 'put'].includes(method)) {
-        requestMethod = axios[method as 'put' | 'post'](fullUrl, body);
+        return this.axiosIntance[method as 'put' | 'post'](fullUrl, body, config)
+          .then(this.handlerResponse.bind(this))
+          .catch(this.handlerError.bind(this));
       }
 
-      return requestMethod.then(this.handlerResponse).catch(this.handlerError);
+      return this.axiosIntance[method](url, config)
+        .then(this.handlerResponse.bind(this))
+        .catch(this.handlerError.bind(this));
     };
   }
 
@@ -42,8 +70,8 @@ export class HttpService {
     return `${this.baseUrl}${url}`;
   }
 
-  private handlerError(error: AxiosError): HttpServiceErrorResponse {
-    const data: HttpServiceErrorResponse = {
+  private handlerError(error: AxiosError): HttpServiceError {
+    const data: HttpServiceError = {
       message: error.message,
       code: error.code
     };
