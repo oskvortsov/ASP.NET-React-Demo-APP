@@ -1,25 +1,19 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+
+import { BrowserRouter } from 'react-router-dom';
+
+import './styles/index.scss';
+import { RootStore, RootStoreProvider } from './model/root-store';
 
 function App() {
+  const rootStore = new RootStore();
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React1
-        </a>
-      </header>
-    </div>
+    <RootStoreProvider value={rootStore}>
+      <BrowserRouter>
+        <div>asd</div>
+      </BrowserRouter>
+    </RootStoreProvider>
   );
 }
 
