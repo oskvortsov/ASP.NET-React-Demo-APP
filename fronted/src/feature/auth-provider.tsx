@@ -1,11 +1,12 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 
 import { httpClient, HttpServiceError } from '../services/http-service';
 
 interface AuthContextType {
   isAuth: boolean;
-  signIn: (username: string, password: string, callback?: () => void) => void;
+  signIn: (username: string, password: string, callback?: () => void) => Promise<void>;
+  signUp: (username: string, password: string, callback?: () => void) => Promise<void>;
   signOut: (callback: () => void) => void;
 }
 
@@ -13,18 +14,30 @@ const AuthContext = React.createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAuth, setIsAuth] = useState<boolean>(!!localStorage.getItem('token'));
+  const navigate = useNavigate();
 
   const signIn = useCallback((username: string, password: string, callback?: () => void) => {
-    httpClient
+    return httpClient
       .post('/Auth', { username, password })
       .then(({ token }: { token: string; expiration: string }) => {
         localStorage.setItem('token', token);
         setIsAuth(true);
+        navigate('/');
 
         if (callback) {
           callback();
         }
       });
+  }, []);
+
+  const signUp = useCallback((username: string, password: string, callback?: () => void) => {
+    return httpClient.post('/Auth/register', { username, password }).then(() => {
+      setIsAuth(true);
+
+      if (callback) {
+        callback();
+      }
+    });
   }, []);
 
   const signOut = useCallback(() => {
@@ -49,7 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, [unAuthErrorHandler]);
 
-  const value = { isAuth, signIn, signOut };
+  const value = { isAuth, signIn, signOut, signUp };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

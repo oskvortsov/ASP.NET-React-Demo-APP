@@ -6,12 +6,17 @@
 }
 
 .loginForm {
+  width: 300px;
   border: 1px solid gray;
   border-radius: 3px;
   padding: 24px;
   display: flex;
   align-items: center;
   flex-direction: column;
+
+  .title {
+    margin-bottom: 12px;
+  }
 
   > div {
     margin-bottom: 24px;

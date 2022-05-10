@@ -73,7 +73,7 @@ export class HttpService {
 
     this.errorHandlers.forEach((callback) => callback(data));
 
-    return data;
+    throw data;
   }
 
   private handlerResponse(response: AxiosResponse) {
