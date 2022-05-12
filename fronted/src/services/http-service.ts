@@ -66,7 +66,7 @@ export class HttpService {
 
   private handlerError(error: AxiosError): HttpServiceError {
     const data: HttpServiceError = {
-      message: error.message,
+      message: String(error.response?.data) || error.message,
       code: error.code,
       status: String(error.response?.status || '')
     };

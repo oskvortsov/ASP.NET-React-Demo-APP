@@ -23,8 +23,14 @@ const EmployeeDetailComponent = () => {
   const isUpdating = id === NEW_PATH_NAME;
 
   useEffect(() => {
-    if (id && isUpdating) {
-      getEmployee(id).then(setEmployee);
+    if (id && !isUpdating) {
+      getEmployee(id)
+        .then(setEmployee)
+        .catch((resErr) =>
+          setError({
+            server: resErr.message
+          })
+        );
     }
   }, [id]);
 

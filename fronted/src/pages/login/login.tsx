@@ -1,21 +1,42 @@
-import { Button, TextField, Typography } from '@mui/material';
+import {
+  Button,
+  FormControl,
+  FormHelperText,
+  IconButton,
+  InputAdornment,
+  InputLabel,
+  OutlinedInput,
+  Typography
+} from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { observer } from 'mobx-react-lite';
 import React, { ChangeEvent, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { ValidationError } from 'yup';
+import * as yup from 'yup';
 
 import { useAuth } from '../../feature/auth-provider';
+import { useBoolean } from '../../utils/hooks';
+import { parseYupErrors } from '../../utils/yup-helper';
 
 import style from './login.module.scss';
 
-type LoginModel = {
+interface LoginModel {
   username: string;
   password: string;
-};
+}
+
+const LoginModelScheme = yup.object().shape({
+  username: yup.string().required('No Username provided.'),
+  password: yup
+    .string()
+    .required('No Password provided.')
+    .min(8, 'Password is too short - should be 8 chars minimum.')
+});
 
 const LoginComponent = () => {
   const { signIn, signUp } = useAuth();
-  const navigate = useNavigate();
-  const [isSignUp, setSignUp] = useState(false);
+  const [isSignUp, onToggleSighUp] = useBoolean(false);
+  const [showPassword, onToggleShowPass] = useBoolean(false);
 
   const [loginData, setLoginData] = useState<LoginModel>({
     username: '',
@@ -34,55 +55,67 @@ const LoginComponent = () => {
   function handlerSignIn() {
     const { username, password } = loginData;
 
-    if (isValid()) {
-      signIn(username, password);
+    if (!validate()) {
+      return;
     }
-  }
 
-  function handlerSignUp() {
-    const { username, password } = loginData;
-    signUp(username, password, () => signIn(username, password)).catch(() => {
+    signIn(username, password).catch(() => {
       setError({
-        password: 'Username and password should be strong'
+        server: 'Username or Password incorrect'
       });
     });
   }
 
-  function isValid() {
+  function handlerSignUp() {
+    if (!validate()) {
+      return;
+    }
+
     const { username, password } = loginData;
-    const error: Record<string, string> = {};
+    signUp(username, password, () => signIn(username, password)).catch((responseErr) => {
+      setError({
+        serverErr: responseErr.message
+      });
+    });
+  }
 
-    if (!username) error['username'] = "Shouldn't be empty";
-    if (!password) error['password'] = "Shouldn't be empty";
-
-    if (Object.keys(error).length) {
-      setError(error);
-      return false;
+  function validate() {
+    try {
+      LoginModelScheme.validateSync(loginData, { abortEarly: false });
+      setError({});
+    } catch (errors) {
+      const dataErrors: Record<string, string> = parseYupErrors(errors as ValidationError);
+      if (Object.keys(dataErrors).length) {
+        setError(dataErrors);
+        return false;
+      }
     }
 
     return true;
   }
 
   function renderButtons() {
-    if (isSignUp) {
-      return (
-        <>
-          <Button variant={'contained'} onClick={handlerSignUp}>
-            Sign Up
-          </Button>
-          <Button onClick={() => setSignUp(!isSignUp)}>or sign in</Button>
-        </>
-      );
+    return (
+      <div className={style.buttons}>
+        <Button variant={'contained'} onClick={isSignUp ? handlerSignUp : handlerSignIn}>
+          {isSignUp ? 'Sign Up' : 'Sign In'}
+        </Button>
+        <Button onClick={onToggleSighUp}>{isSignUp ? 'or sign in' : 'or sign up'}</Button>
+      </div>
+    );
+  }
+
+  function renderErrors() {
+    let message = '';
+    for (let field in errorData) {
+      message += `${errorData[field]} `;
     }
 
-    return (
-      <>
-        <Button variant={'contained'} onClick={handlerSignIn}>
-          Sign In
-        </Button>
-        <Button onClick={() => setSignUp(!isSignUp)}>or sign up</Button>
-      </>
-    );
+    if (message) {
+      return <FormHelperText error>{message}</FormHelperText>;
+    }
+
+    return null;
   }
 
   return (
@@ -91,26 +124,41 @@ const LoginComponent = () => {
         <Typography variant={'h6'} className={style.title}>
           {isSignUp ? 'Sign Up' : 'Authorization'}
         </Typography>
-        <TextField
-          fullWidth
-          id="username"
-          label="username"
-          value={loginData.username}
-          type="text"
-          onChange={handlerChange}
-          error={'username' in errorData}
-          helperText={errorData['username']}
-        />
-        <TextField
-          fullWidth
-          id="password"
-          label="password"
-          value={loginData.password}
-          type="password"
-          error={'password' in errorData}
-          helperText={errorData['password']}
-          onChange={handlerChange}
-        />
+
+        <div className={style.fields}>
+          <FormControl fullWidth>
+            <InputLabel htmlFor="name">Name</InputLabel>
+            <OutlinedInput
+              id="username"
+              label="username"
+              value={loginData.username}
+              type="text"
+              onChange={handlerChange}
+              error={'username' in errorData}
+            />
+          </FormControl>
+
+          <FormControl fullWidth>
+            <InputLabel htmlFor="password">Password</InputLabel>
+            <OutlinedInput
+              fullWidth
+              id="password"
+              label="password"
+              value={loginData.password}
+              type={showPassword ? 'text' : 'password'}
+              error={'password' in errorData}
+              endAdornment={
+                <InputAdornment position="end">
+                  <IconButton onClick={onToggleShowPass} onMouseDown={onToggleShowPass} edge="end">
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              }
+              onChange={handlerChange}
+            />
+          </FormControl>
+          {renderErrors()}
+        </div>
 
         {renderButtons()}
       </div>

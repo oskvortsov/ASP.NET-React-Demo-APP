@@ -68,7 +68,14 @@ public class AuthController: ControllerBase
 
         if (!result.Succeeded)
         {
-            return BadRequest("Something went wrong!");
+            var errorMsg = result.Errors.First().Description;
+
+            if (errorMsg.Equals(null))
+            {
+                errorMsg = "Something went wrong!";
+            }
+            
+            return BadRequest( errorMsg);
         }
 
         return Ok("User created");
