@@ -2,7 +2,7 @@ import { Button } from '@mui/material';
 import { toJS } from 'mobx';
 import React, { useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
-import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridSortModel, GridValueGetterParams } from '@mui/x-data-grid';
 import { useNavigate } from 'react-router-dom';
 
 import { useStore } from '../../models/root-store';
@@ -10,7 +10,7 @@ import { useStore } from '../../models/root-store';
 import style from './employee.module.scss';
 
 const columns: GridColDef[] = [
-  { field: 'id', headerName: 'ID', width: 120 },
+  { field: 'id', headerName: 'ID', width: 120, sortable: false },
   { field: 'name', headerName: 'Name', width: 100 },
   { field: 'email', headerName: 'Email', width: 170 },
   {
@@ -24,6 +24,7 @@ const columns: GridColDef[] = [
     field: 'lastModifiedDate',
     headerName: 'Last Updated',
     width: 150,
+    sortable: false,
     valueGetter: dateTimeConvertor('lastModifiedDate')
   }
 ];
@@ -39,7 +40,11 @@ function dateTimeConvertor(field: string) {
 }
 
 const EmployeeListComponent = () => {
-  const { employees, getEmployees } = useStore();
+  const {
+    employees: { items, pagination, isLoading },
+    getEmployees,
+    filterEmployees
+  } = useStore();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -55,6 +60,29 @@ const EmployeeListComponent = () => {
     navigate(`/employees/${id}`);
   }
 
+  function handlerPageChange(pageNumber: number) {
+    filterEmployees({
+      pageNumber
+    });
+  }
+
+  function handlerPageSizeChange(pageSize: number) {
+    filterEmployees({
+      pageNumber: 0,
+      pageSize
+    });
+  }
+
+  function handlerSortChange(model: GridSortModel) {
+    if (!model.length) return;
+    const [{ field, sort }] = model;
+    const orderBy = `${field} ${sort}`;
+
+    filterEmployees({
+      orderBy
+    });
+  }
+
   return (
     <div className={style.container}>
       <div className={style.btnContainer}>
@@ -64,14 +92,21 @@ const EmployeeListComponent = () => {
       </div>
 
       <DataGrid
-        rows={toJS(employees)}
+        rows={toJS(items)}
         columns={columns}
-        pageSize={5}
-        rowsPerPageOptions={[5]}
+        pageSize={pagination.PageSize}
+        rowCount={pagination.TotalCount}
+        rowsPerPageOptions={[2, 4, 10]}
+        loading={isLoading}
+        paginationMode={'server'}
+        sortingMode={'server'}
         disableColumnFilter
         disableColumnMenu
         disableSelectionOnClick={true}
         onRowClick={handlerRowClick}
+        onPageChange={handlerPageChange}
+        onPageSizeChange={handlerPageSizeChange}
+        onSortModelChange={handlerSortChange}
       />
     </div>
   );

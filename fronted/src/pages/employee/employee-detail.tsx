@@ -20,10 +20,10 @@ const EmployeeDetailComponent = () => {
 
   const { getEmployee, createOrUpdateEmployee, removeEmployee } = useStore();
 
-  const isUpdating = id === NEW_PATH_NAME;
+  const isUpdating = id !== NEW_PATH_NAME;
 
   useEffect(() => {
-    if (id && !isUpdating) {
+    if (id && isUpdating) {
       getEmployee(id)
         .then(setEmployee)
         .catch((resErr) =>

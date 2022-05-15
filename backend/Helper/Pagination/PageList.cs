@@ -10,6 +10,7 @@ public class PageList<T>: List<T>
     public int TotalPages { get; private set; }
     public int PageSize { get; private set; }
     public int TotalCount { get; private set; }
+    public bool HasNext => CurrentPage < TotalPages;
     
     public PageList(List<T> items, int count, int pageNumber, int pageSize)
     {
@@ -22,15 +23,16 @@ public class PageList<T>: List<T>
 
     public string GetMetadata()
     {
-        var metadata = new
+        var data = new
         {
             TotalCount,
             PageSize,
             CurrentPage,
-            TotalPages
+            TotalPages,
+            HasNext,
         };
 
-        return JsonConvert.SerializeObject(metadata);
+        return JsonConvert.SerializeObject(data);
     }
 
     public static async Task<PageList<T>> ToPageList(IQueryable<T> source, int pageNumber, int pageSize)

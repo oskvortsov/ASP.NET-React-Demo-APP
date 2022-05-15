@@ -5,11 +5,16 @@ import axios, {
   AxiosRequestHeaders,
   AxiosResponse
 } from 'axios';
+import { Pagination } from '../models/common';
 
 export type HttpServiceError = Pick<AxiosError, 'message' | 'code' | 'status'>;
 type ErrorHandlerFunction = (error: HttpServiceError) => void;
 
 const TokenLS = 'token';
+
+const HEADERS_PARAMS = {
+  xPagination: 'x-pagination'
+};
 
 export class HttpService {
   private axiosInstance: Axios;
@@ -36,7 +41,8 @@ export class HttpService {
 
   private get Headers() {
     const headers: AxiosRequestHeaders = {
-      'Access-Control-Allow-Origin': '*'
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Expose-Headers': 'X-Pagination'
     };
 
     if (localStorage.getItem(TokenLS)) {
@@ -77,6 +83,23 @@ export class HttpService {
   }
 
   private handlerResponse(response: AxiosResponse) {
+    if (response.headers[HEADERS_PARAMS.xPagination]) {
+      let pagination: Pagination | null = null;
+
+      try {
+        pagination = JSON.parse(response.headers[HEADERS_PARAMS.xPagination]);
+      } catch (err) {
+        pagination = null;
+      }
+
+      if (pagination) {
+        return {
+          pagination,
+          items: response.data
+        };
+      }
+    }
+
     return response.data;
   }
 }

@@ -1,23 +1,81 @@
 import { makeObservable, observable, runInAction } from 'mobx';
 import { createContext, useContext } from 'react';
+import { stringify as encodeQueryParams } from 'query-string';
+
 import { httpClient } from '../services/http-service';
+import { initPagination, Pagination, PaginationResponse } from './common';
 import { Employee } from './employee';
 
 export class RootStore {
-  employees: Employee[];
+  employees: {
+    items: Employee[];
+    pagination: Pagination;
+    orderBy: string;
+    isLoading: boolean;
+  };
 
   constructor() {
-    this.employees = [];
+    this.employees = {
+      items: [],
+      isLoading: false,
+      orderBy: '',
+      pagination: initPagination()
+    };
 
     makeObservable(this, {
       employees: observable
     });
   }
 
+  filterEmployees = ({
+    pageNumber,
+    pageSize,
+    orderBy
+  }: {
+    pageNumber?: number;
+    pageSize?: number;
+    orderBy?: string;
+  }) => {
+    if (pageNumber !== undefined) {
+      this.employees.pagination.CurrentPage = pageNumber + 1;
+    }
+
+    if (orderBy !== undefined) {
+      this.employees.orderBy = orderBy;
+    }
+
+    if (pageSize !== undefined) {
+      this.employees.pagination.PageSize = pageSize;
+    }
+
+    this.getEmployees();
+  };
+
   getEmployees = () => {
-    httpClient.get('/employee').then((employees: Employee[]) => {
+    this.employees.isLoading = true;
+    const {
+      pagination: { CurrentPage, PageSize },
+      orderBy
+    } = this.employees;
+
+    const params: Record<string, string | number> = {
+      PageNumber: CurrentPage,
+      PageSize
+    };
+
+    if (orderBy) {
+      params['OrderBy'] = orderBy;
+    }
+
+    const url = `/employee?${encodeQueryParams(params)}`;
+
+    httpClient.get(url).then((data: PaginationResponse<Employee[]>) => {
       runInAction(() => {
-        this.employees = employees;
+        this.employees = {
+          ...this.employees,
+          ...data,
+          isLoading: false
+        };
       });
     });
   };

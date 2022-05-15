@@ -1,3 +1,4 @@
+using backend.Helper.Pagintaion;
 using backend.Models;
 using backend.Repositories;
 using Microsoft.AspNetCore.Authorization;
@@ -5,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers;
 
-[Authorize]
+// [Authorize]
 [ApiController]
 [Route("employee")]
 public class EmployeesController: ControllerBase
@@ -18,9 +19,12 @@ public class EmployeesController: ControllerBase
     }
 
     [HttpGet]
-    public  async Task<List<Employee>> List()
+    public  async Task<PageList<Employee>> List([FromQuery] EmployeeParams employeeParams)
     {
-        return await _employeeRepository.FinAll();
+        var employees = await _employeeRepository.GetEmployees(employeeParams);
+        Response.Headers.Add("X-Pagination", employees.GetMetadata());
+
+        return employees;
     }
 
     [HttpGet("{id:int}")]

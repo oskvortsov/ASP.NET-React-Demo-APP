@@ -18,6 +18,7 @@ builder.Services.AddCors(options => options.AddDefaultPolicy(corsBuilder =>
     corsBuilder.AllowAnyHeader();
     corsBuilder.AllowAnyOrigin();
     corsBuilder.AllowAnyMethod();
+    corsBuilder.WithExposedHeaders("X-Pagination");
 }));
 
 // Add Database 

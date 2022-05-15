@@ -1,4 +1,6 @@
 using backend.Contexts;
+using backend.Controllers;
+using backend.Helper.Pagintaion;
 using backend.Helper.Sorting;
 using backend.Models;
 using Microsoft.EntityFrameworkCore;
@@ -25,9 +27,17 @@ public class EmployeeRepository
         return employee;
     }
 
-    public async Task<List<Employee>> FinAll()
+    public IQueryable<Employee> FinAll()
     {
-        return await _dbContext.Employees.AsNoTracking().ToListAsync();
+        return _dbContext.Employees.AsNoTracking();
+    }
+
+    public async Task<PageList<Employee>> GetEmployees(EmployeeParams employeeParams)
+    {
+        var employees = FinAll();
+        employees = _employeeSorting.ApplySort(employees, employeeParams.OrderBy);
+        
+        return await PageList<Employee>.ToPageList(employees, employeeParams.PageNumber, employeeParams.PageSize);
     }
 
     public Employee Update(int id, Employee employee)
