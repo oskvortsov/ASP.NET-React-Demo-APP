@@ -1,8 +1,7 @@
-using backend.Contexts;
 using backend.Models;
+using backend.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace backend.Controllers;
 
@@ -11,24 +10,23 @@ namespace backend.Controllers;
 [Route("employee")]
 public class EmployeesController: ControllerBase
 {
-    private readonly MsSqlContext _dbContext;
+    private readonly EmployeeRepository _employeeRepository;
 
-    public EmployeesController(MsSqlContext db)
+    public EmployeesController(EmployeeRepository employeeRepository)
     {
-        _dbContext = db;
+        _employeeRepository = employeeRepository;
     }
 
     [HttpGet]
-    public List<Employee> List()
+    public  async Task<List<Employee>> List()
     {
-        var persons = _dbContext.Employees.ToList();
-        return persons;
+        return await _employeeRepository.FinAll();
     }
 
     [HttpGet("{id:int}")]
-    public IActionResult Get(int id)
+    public async Task<IActionResult> Get(int id)
     {
-        var person = _dbContext.Employees.Find(id);
+        var person = await _employeeRepository.GetById(id);
 
         if (person == null)
         {
@@ -41,38 +39,28 @@ public class EmployeesController: ControllerBase
     [HttpPost]
     public IActionResult Create([FromBody] Employee employee)
     {
-        employee.LastModifiedDate = DateTime.Now;
-        _dbContext.Add(employee);
-        _dbContext.SaveChanges();
-
-        return Ok(employee);
+        var newEmployee = _employeeRepository.Create(employee);
+        return Ok(newEmployee);
     }
 
     [HttpPut("{id:int}")]
     public IActionResult Update(int id, [FromBody] Employee employee)
     {
-        employee.Id = id;
-        employee.LastModifiedDate = DateTime.UtcNow;
-        
-        _dbContext.Entry(employee).State = EntityState.Modified;
-        _dbContext.SaveChanges();
-
-        return Ok(employee);
+        var updatedEmployee = _employeeRepository.Update(id, employee);
+        return Ok(updatedEmployee);
     }
 
     [HttpDelete("{id:int}")]
-    public IActionResult Delete(int id)
+    public async Task<IActionResult> Delete(int id)
     {
-        var employee = _dbContext.Employees.Find(id);
+        var result = await _employeeRepository.Delete(id);
 
-        if (employee == null)
+        if (result)
         {
-            return NotFoundMessageById(id);
+            return Ok("Employee have been removed");
         }
-
-        _dbContext.Employees.Remove(employee);
-        _dbContext.SaveChanges();
-        return Ok("Employee have been removed");
+        
+        return NotFoundMessageById(id);
     }
 
     private IActionResult NotFoundMessageById(int id)

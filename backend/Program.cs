@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 using backend.Contexts;
+using backend.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 ConfigurationManager configuration = builder.Configuration;
@@ -23,6 +24,9 @@ builder.Services.AddCors(options => options.AddDefaultPolicy(corsBuilder =>
 builder.Services.AddDbContext<MsSqlContext>(o => o.UseSqlServer(
     builder.Configuration.GetConnectionString("MsSQL"))
 );
+
+// Repositories
+builder.Services.AddRepositories();
 
 // Identity
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
