@@ -27,14 +27,14 @@ public class EmployeeRepository
         return employee;
     }
 
-    public IQueryable<Employee> FinAll()
+    public IQueryable<Employee> FindAll()
     {
         return _dbContext.Employees.AsNoTracking();
     }
 
     public async Task<PageList<Employee>> GetEmployees(EmployeeParams employeeParams)
     {
-        var employees = FinAll();
+        var employees = FindAll();
         employees = _employeeSorting.ApplySort(employees, employeeParams.OrderBy);
         
         return await PageList<Employee>.ToPageList(employees, employeeParams.PageNumber, employeeParams.PageSize);
