@@ -1,7 +1,7 @@
 using backend.Contexts;
 using backend.Controllers;
+using backend.Extensions;
 using backend.Helper.Pagintaion;
-using backend.Helper.Sorting;
 using backend.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,13 +9,11 @@ namespace backend.Repositories;
 
 public class EmployeeRepository
 {
-    private readonly ISorting<Employee> _employeeSorting;
     private readonly MsSqlContext _dbContext;
 
-    public EmployeeRepository(MsSqlContext dbContext, ISorting<Employee> employeeSorting)
+    public EmployeeRepository(MsSqlContext dbContext)
     {
         _dbContext = dbContext;
-        _employeeSorting = employeeSorting;
     }
 
     public Employee Create(Employee employee)
@@ -35,8 +33,8 @@ public class EmployeeRepository
     public async Task<PageList<Employee>> GetEmployees(EmployeeParams employeeParams)
     {
         var employees = FindAll();
-        employees = _employeeSorting.ApplySort(employees, employeeParams.OrderBy);
-        
+        employees = (IQueryable<Employee>) employees.ApplySort(employeeParams.OrderBy);
+
         return await PageList<Employee>.ToPageList(employees, employeeParams.PageNumber, employeeParams.PageSize);
     }
 

@@ -2,9 +2,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace backend.Models;
 
-public class LoginModel
+public class UserDTO
 {
-    [Key]
     [Required(ErrorMessage = "User Name is required")]
     public string? Username { get; set; }
 

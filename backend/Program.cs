@@ -28,6 +28,7 @@ builder.Services.AddDbContext<MsSqlContext>(o => o.UseSqlServer(
 
 // Repositories
 builder.Services.AddRepositories();
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 // Identity
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()

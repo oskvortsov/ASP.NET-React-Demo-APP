@@ -6,7 +6,6 @@ export interface Employee {
   email: string;
   birthDateTime?: Date;
   salary: number;
-  lastModifiedDate?: string;
 }
 
 export function createEmployee(): Employee {

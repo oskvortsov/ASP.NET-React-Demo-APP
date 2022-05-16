@@ -2,17 +2,18 @@ using System.Reflection;
 using System.Text;
 using System.Linq.Dynamic.Core;
 
-namespace backend.Helper.Sorting;
 
-public class Sorting<T> : ISorting<T>
+namespace backend.Extensions;
+
+public static class SortingExtension
 {
-    public IQueryable<T> ApplySort(IQueryable<T> entities, string orderByQueryString)
+    public static IQueryable ApplySort(this IQueryable entities, string orderByQueryString)
     {
         if (!entities.Any() || string.IsNullOrWhiteSpace(orderByQueryString))
             return entities;
 
         var orderParams = orderByQueryString.Trim().Split(',');
-        var propertyInfos = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
+        var propertyInfos = entities.ElementType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
         var orderQueryBuilder = new StringBuilder();
 
         foreach (var param in orderParams)
@@ -32,7 +33,7 @@ public class Sorting<T> : ISorting<T>
         }
 
         var orderQuery = orderQueryBuilder.ToString().TrimEnd(',', ' ');
-
+        
         return entities.OrderBy(orderQuery);
     }
 }

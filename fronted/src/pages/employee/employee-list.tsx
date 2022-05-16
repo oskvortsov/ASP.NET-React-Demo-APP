@@ -10,23 +10,16 @@ import { useStore } from '../../models/root-store';
 import style from './employee.module.scss';
 
 const columns: GridColDef[] = [
-  { field: 'id', headerName: 'ID', width: 120, sortable: false },
-  { field: 'name', headerName: 'Name', width: 100 },
-  { field: 'email', headerName: 'Email', width: 170 },
+  { field: 'id', headerName: 'ID', width: 150, sortable: false },
+  { field: 'name', headerName: 'Name', width: 120 },
+  { field: 'email', headerName: 'Email', width: 200 },
   {
     field: 'birthDateTime',
     headerName: 'Birth Day',
-    width: 150,
+    width: 180,
     valueGetter: dateTimeConvertor('birthDateTime')
   },
-  { field: 'salary', headerName: 'Salary', width: 100 },
-  {
-    field: 'lastModifiedDate',
-    headerName: 'Last Updated',
-    width: 150,
-    sortable: false,
-    valueGetter: dateTimeConvertor('lastModifiedDate')
-  }
+  { field: 'salary', headerName: 'Salary', width: 100 }
 ];
 
 function dateTimeConvertor(field: string) {

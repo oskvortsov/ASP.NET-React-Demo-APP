@@ -17,17 +17,17 @@ public class AuthController: ControllerBase
     private readonly UserManager<IdentityUser> _userManager;
     private readonly IConfiguration _configuration;
 
-    public AuthController(MsSqlContext dbContext, UserManager<IdentityUser> userManager, IConfiguration configuration)
+    public AuthController(UserManager<IdentityUser> userManager, IConfiguration configuration)
     {
         _userManager = userManager;
         _configuration = configuration;
     }
     
     [HttpPost]
-    public async Task<IActionResult> Login([FromBody] LoginModel loginModel)
+    public async Task<IActionResult> Login(UserDTO userDto)
     {
-        var user = await _userManager.FindByNameAsync(loginModel.Username);
-        if (user != null && await _userManager.CheckPasswordAsync(user, loginModel.Password))
+        var user = await _userManager.FindByNameAsync(userDto.Username);
+        if (user != null && await _userManager.CheckPasswordAsync(user, userDto.Password))
         {
             var authClaims = new List<Claim>
             {
@@ -49,7 +49,7 @@ public class AuthController: ControllerBase
     }
 
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] User userModel)
+    public async Task<IActionResult> Register(UserDTO userModel)
     {
         var isUserExists = await _userManager.FindByNameAsync(userModel.Username) != null;
 
