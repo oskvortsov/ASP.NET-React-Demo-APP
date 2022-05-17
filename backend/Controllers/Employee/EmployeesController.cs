@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers;
 
-// [Authorize]
+[Authorize]
 [ApiController]
 [Route("employee")]
 public class EmployeesController: ControllerBase
