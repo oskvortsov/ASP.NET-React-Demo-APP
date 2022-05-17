@@ -33,7 +33,7 @@ public class EmployeeRepository
     public async Task<PageList<Employee>> GetEmployees(EmployeeParams employeeParams)
     {
         var employees = FindAll();
-        employees = (IQueryable<Employee>) employees.ApplySort(employeeParams.OrderBy);
+        employees = employees.ApplySort(employeeParams.OrderBy);
 
         return await PageList<Employee>.ToPageList(employees, employeeParams.PageNumber, employeeParams.PageSize);
     }
